@@ -1,14 +1,21 @@
+"""Base settings for Car Rental project."""
 from pathlib import Path
 from datetime import timedelta
 from decouple import config, Csv
 
 # --- Core Settings ---
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 SECRET_KEY = config("DJANGO_SECRET_KEY")
+
 DEBUG = config("DJANGO_DEBUG", default=True, cast=bool)
+
+
 ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="", cast=Csv())
 if DEBUG and not ALLOWED_HOSTS:
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
+
 
 # --- Application Definition ---
 INSTALLED_APPS = [
@@ -104,11 +111,12 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=config("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", default=30, cast=int)),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=config("JWT_REFRESH_TOKEN_LIFETIME_DAYS", default=14, cast=int)),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',
@@ -144,5 +152,5 @@ else:
     EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
     EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
     EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-    
+
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@car-rental.com')
