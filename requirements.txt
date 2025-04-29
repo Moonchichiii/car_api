@@ -17,3 +17,10 @@ black
 flake8
 gunicorn
 django-phonenumber-field[phonenumbers]
+
+# testing! - remove in production
+pytest 
+pytest-django 
+pytest-cov 
+pytest-factoryboy
+Faker
