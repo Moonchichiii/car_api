@@ -1,0 +1,146 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+static/
+staticfiles/
+
+
+# Virtual Environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+
+# Database
+*.db
+*.sqlite3
+*.psql
+*.postgresql
+*.mysql
+
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+
+# Test coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.pytest_cache/
+
+
+# Django migration files (optional)
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+
+# Logs
+logs/
+*.log
+
+
+# Media files
+media/
+uploads/
+
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+
+# Node (if using any frontend frameworks)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+
+# Compiled files
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+
+# Backup files
+*.bak
+*.swp
+*.swo
+
+
+# System files
+.DS_Store
+Thumbs.db
+
+
+# Wagtail
+wagtail_cache/
+
+
+# Scout APM
+scout_apm_core
+
+
+# Sentry
+sentry-debug.log
+
+
+# Selenium
+geckodriver.log
+
+
+# Local development
+local/
+
+
+pytest_cache/
+.coveragerc
