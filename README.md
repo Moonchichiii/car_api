@@ -2,7 +2,7 @@
 
 > A lean, Django REST backend for vehicle bookings and user management.
 
-- **Frontend Repository**: (https://github.com/Moonchichiii/car_client)
+- **Frontend Repository**: [Car Client](https://github.com/Moonchichiii/car_client)
 
 ---
 
@@ -15,7 +15,7 @@
 - [🚦 Quickstart](#-quickstart)  
 - [🧪 Tests](#-tests)  
 - [📊 Diagram](#-diagram)  
-- [🛣️ Roadmap](#-roadmap)  
+- [🛣️ Roadmap](#️-roadmap)  
 
 ---
 
@@ -53,23 +53,23 @@ car_rental_api/
 ├── .env/.env.example
 ├── manage.py
 └── requirements.txt
-🔝 Back to top
+```
 
-⚡ Features
-Email-based JWT auth
+[🔝 Back to top](#-table-of-contents)
 
-Google OAuth
+## ⚡ Features
 
-Vehicle & booking CRUD
+- Email-based JWT auth
+- Google OAuth
+- Vehicle & booking CRUD
+- PostGIS radius search
+- Cloudinary uploads
 
-PostGIS radius search
+[🔝 Back to top](#-table-of-contents)
 
-Cloudinary uploads
-🔝 Back to top
+## 🚦 Quickstart
 
-🚦 Quickstart
-bash
-
+```bash
 git clone <repo>
 cd car_rental_api
 python -m venv venv
@@ -79,38 +79,44 @@ cp .env.example .env     # fill in values
 python manage.py migrate
 python manage.py runserver
 # celery -A config worker -l info  (optional)
-🔝 Back to top
+```
 
-🧪 Tests
-Unit & integration
+[🔝 Back to top](#-table-of-contents)
 
-bash
+## 🧪 Tests
+
+### Unit & integration
+
+```bash
 pytest
-Load testing
+```
 
-bash
+### Load testing
+
+```bash
 locust -f tests/locust/locustfile.py
 # open http://localhost:8089
-🔝 Back to top
+```
 
-📊 Diagram
-<details> <summary>Select diagram</summary>
-Choose one:
-<select>
+[🔝 Back to top](#-table-of-contents)
 
-<option value="class">Class Diagram</option> <option value="er">ER Diagram</option> </select>
-mermaid
-<img src="class-diagram.webp"></img>
+## 📊 Diagram
 
-</details> [🔝 Back to top](#-table-of-contents)
-🛣️ Roadmap
-Auth & user setup
+**Diagram Options:**
 
-Vehicle & booking APIs
+- [Class Diagram](class-diagram.webp)
+- [ER Diagram](er-diagram.webp)
 
-Webhooks & media
+![Class Diagram](class-diagram.webp)
 
-Geolocation & maps
+[🔝 Back to top](#-table-of-contents)
 
-Testing & deployment
-🔝 Back to top
+## 🛣️ Roadmap
+
+1. Auth & user setup
+2. Vehicle & booking APIs
+3. Webhooks & media
+4. Geolocation & maps
+5. Testing & deployment
+
+[🔝 Back to top](#-table-of-contents)
