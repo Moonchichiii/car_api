@@ -16,3 +16,4 @@ whitenoise
 black
 flake8
 gunicorn
+django-phonenumber-field[phonenumbers]

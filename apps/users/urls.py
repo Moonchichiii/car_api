@@ -1,7 +1,8 @@
+"""URL patterns for the users app."""
 from django.urls import path
 from . import views
 
-app_name = 'users'
+app_name = 'users'  # pylint: disable=invalid-name
 
 urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
