@@ -14,7 +14,7 @@ from social_django.utils import load_strategy, load_backend
 
 from .serializers import UserSerializer, LoginSerializer
 
-# Set up logger
+# logger
 logger = logging.getLogger(__name__)
 
 

@@ -72,7 +72,7 @@ DATABASES = {
         "USER": "postgres",
         "PASSWORD": config("DB_PASSWORD"),
         "HOST": "localhost",
-        "PORT": "5432",
+        "PORT": "5433",
         "CONN_MAX_AGE": 600,
         "OPTIONS": {"sslmode": "prefer"},
     }
@@ -110,11 +110,20 @@ REST_FRAMEWORK = {
     ),
 }
 
+JWT_AUTH_COOKIE = "access"
+JWT_AUTH_REFRESH_COOKIE = "refresh"
+JWT_AUTH_COOKIE_HTTP_ONLY = True
+JWT_AUTH_COOKIE_SECURE = not DEBUG
+JWT_AUTH_COOKIE_SAMESITE = "Lax"
+
+
+# Simple-JWT settings
+
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 
 

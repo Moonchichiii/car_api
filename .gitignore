@@ -144,5 +144,4 @@ local/
 
 pytest_cache/
 .coveragerc
-pytest.ini
-tests/
+
