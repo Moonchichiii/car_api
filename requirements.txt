@@ -1,4 +1,5 @@
 Django
+django-cryptography-django5==2.2
 python-decouple
 psycopg2-binary
 dj-database-url
@@ -6,6 +7,7 @@ djangorestframework
 djangorestframework-simplejwt
 django-cors-headers
 django-allauth
+dj-rest-auth
 social-auth-app-django
 django-modeltranslation
 django-cloudinary-storage
@@ -18,9 +20,12 @@ flake8
 gunicorn
 django-phonenumber-field[phonenumbers]
 
+
 # testing! - remove in production
 pytest 
 pytest-django 
 pytest-cov 
 pytest-factoryboy
 Faker
+python-dateutil
+

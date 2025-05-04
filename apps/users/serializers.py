@@ -1,201 +1,222 @@
-"""Serializers for the users app."""
-from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
-from phonenumber_field.serializerfields import PhoneNumberField
-from apps.users.models import UserConsent
+"""Serializers for user registration, login, and profile management."""
+import logging
+from typing import Any, Dict, Optional
 
-User = get_user_model()
+from django.contrib.auth import authenticate
+from django.db import transaction
+from django.utils import timezone
+from rest_framework import serializers
+
+from allauth.account.models import EmailAddress
+from dj_rest_auth.registration.serializers import RegisterSerializer
+from dj_rest_auth.serializers import LoginSerializer as DefaultLoginSerializer
+from phonenumber_field.serializerfields import PhoneNumberField
+
+from .mixins import LicenseRequiredMixin, ConsentRequiredMixin
+from .utils import create_user_consents
+from .auth_logger import log_auth_event
+from .models import User
+
+logger = logging.getLogger(__name__)
+
+
+class CustomRegisterSerializer(
+    LicenseRequiredMixin, ConsentRequiredMixin, RegisterSerializer
+):
+    """Register a new user with strong validation & GDPR consent logging."""
+
+    username = None
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+    phone_number = PhoneNumberField(required=False, allow_null=True)
+    date_of_birth = serializers.DateField(required=False, allow_null=True)
+
+    address_line1 = serializers.CharField()
+    address_line2 = serializers.CharField(required=False, allow_blank=True)
+    city = serializers.CharField(required=False, allow_blank=True)
+    postal_code = serializers.CharField(required=False, allow_blank=True)
+    country = serializers.CharField(required=False, allow_blank=True)
+
+    drivers_license_number = serializers.CharField(
+        write_only=True, style={"input_type": "password"}
+    )
+    drivers_license_expiry = serializers.DateField(required=False, allow_null=True)
+
+    accepted_terms = serializers.BooleanField(default=False)
+    accepted_privacy_policy = serializers.BooleanField(default=False)
+    marketing_emails = serializers.BooleanField(default=False)
+
+    def validate_email(self, email: str) -> str:
+        email = email.lower()
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError("Email already in use")
+        return email
+
+    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        data = super().validate(data)
+        pw = data.get("password")
+        if pw:
+            from django.contrib.auth.password_validation import validate_password
+
+            validate_password(pw)
+        return data
+
+    def save(self, request) -> User:
+        with transaction.atomic():
+            user = super().save(request)
+            for f in [
+                "first_name",
+                "last_name",
+                "phone_number",
+                "date_of_birth",
+                "drivers_license_number",
+                "drivers_license_expiry",
+                "address_line1",
+                "address_line2",
+                "city",
+                "postal_code",
+                "country",
+                "accepted_terms",
+                "accepted_privacy_policy",
+                "marketing_emails",
+            ]:
+                setattr(user, f, self.validated_data.get(f, getattr(user, f, None)))
+
+            if user.accepted_terms or user.accepted_privacy_policy:
+                user.terms_acceptance_date = timezone.now()
+
+            # For production, set this to False and rely on allauth flow
+            user.email_verified = True
+            user.last_login_ip = request.META.get("REMOTE_ADDR")
+
+            user.save()
+
+            EmailAddress.objects.update_or_create(
+                user=user,
+                defaults={"email": user.email, "primary": True, "verified": True},
+            )
+
+            create_user_consents(
+                user,
+                {
+                    "accepted_terms": user.accepted_terms,
+                    "accepted_privacy_policy": user.accepted_privacy_policy,
+                    "marketing_emails": user.marketing_emails,
+                },
+                request.META.get("REMOTE_ADDR"),
+            )
+
+        log_auth_event(
+            "registration_success",
+            user,
+            request,
+            {"consent_count": user.consents.count()},
+        )
+        return user
+
+
+class CustomLoginSerializer(DefaultLoginSerializer):
+    """Log in via email & password, record last-login IP."""
+
+    username = None
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        pw = attrs.get("password")
+        req = self.context.get("request")
+
+        if not (email and pw):
+            raise serializers.ValidationError(
+                "Email & password required", code="authorization"
+            )
+
+        user = authenticate(request=req, username=email, password=pw)
+        if not user or not user.is_active:
+            raise serializers.ValidationError(
+                "Invalid credentials", code="authorization"
+            )
+
+        user.last_login_ip = req.META.get("REMOTE_ADDR")
+        user.save(update_fields=["last_login_ip"])
+
+        attrs["user"] = user
+        log_auth_event("login_success", user, req, {})
+        return attrs
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Serializer for the User model with enhanced validation."""
-    phone_number = PhoneNumberField(required=False)
-    confirm_password = serializers.CharField(write_only=True, required=False)
-    accepted_terms = serializers.BooleanField(required=False)
-    accepted_privacy_policy = serializers.BooleanField(required=False)
+    """Read/write profile, with masked driver's license."""
+
+    phone_number = PhoneNumberField(required=False, allow_null=True)
+    masked_license = serializers.SerializerMethodField()
+    current_password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         """Meta class for UserSerializer."""
         model = User
-        fields = (
-            'id', 'email', 'first_name', 'last_name', 'password', 'confirm_password',
-            'phone_number', 'date_of_birth', 'address_line1', 'address_line2',
-            'city', 'postal_code', 'country', 'drivers_license_number',
-            'drivers_license_expiry', 'accepted_terms', 'accepted_privacy_policy',
-            'marketing_emails', 'email_verified', 'phone_verified', 'identity_verified'
-        )
-        extra_kwargs = {
-            'password': {'write_only': True},
-            'email_verified': {'read_only': True},
-            'phone_verified': {'read_only': True},
-            'identity_verified': {'read_only': True},
-        }
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "date_of_birth",
+            "address_line1",
+            "address_line2",
+            "city",
+            "postal_code",
+            "country",
+            "masked_license",
+            "drivers_license_expiry",
+            "drivers_license_number",
+            "accepted_terms",
+            "accepted_privacy_policy",
+            "marketing_emails",
+            "email_verified",
+            "phone_verified",
+            "identity_verified",
+            "terms_acceptance_date",
+            "last_modified",
+            "date_joined",
+            "current_password",
+        ]
+        read_only_fields = [
+            "id",
+            "email_verified",
+            "masked_license",
+            "date_joined",
+            "last_modified",
+        ]
+        extra_kwargs = {"drivers_license_number": {"write_only": True}}
 
-    def validate_date_of_birth(self, value):
-        """Validate user is at least 18 years old."""
-        if not value:
-            return value
-
-        current_date = timezone.now().date()
-        age = current_date.year - value.year
-
-        # Adjust age if birthday hasn't occurred yet this year
-        if (current_date.month, current_date.day) < (value.month, value.day):
-            age -= 1
-
-        if age < 18:
-            raise serializers.ValidationError(_("You must be at least 18 years old to register."))
-        return value
+    def get_masked_license(self, obj: User) -> Optional[str]:
+        """Return the last 4 digits of the driver's license number, masked."""
+        num = obj.drivers_license_number or ""
+        return f"{'*'*(len(num)-4)}{num[-4:]}" if len(num) >= 4 else None
 
     def validate(self, attrs):
-        """Validate password confirmation and terms acceptance for new users."""
-        # Only validate these fields during creation, not updates
-        if self.instance is None:  # This is a create operation
-            # Require password confirmation
-            if 'confirm_password' in attrs:
-                if attrs['password'] != attrs.pop('confirm_password'):
-                    raise serializers.ValidationError(
-                        {"confirm_password": _("Passwords don't match.")}
-                    )
+        user = self.instance
+        new_email = attrs.get("email")
+        pwd = attrs.pop("current_password", None)
 
-            # Require terms acceptance
-            if not attrs.get('accepted_terms', False):
+        if new_email and new_email.lower() != user.email.lower():
+            if not pwd or not user.check_password(pwd):
                 raise serializers.ValidationError(
-                    {"accepted_terms": _("You must accept the Terms of Service.")}
+                    {"current_password": "Required/correct to change email"}
                 )
+            if (
+                User.objects.filter(email__iexact=new_email)
+                .exclude(pk=user.pk)
+                .exists()
+            ):
+                raise serializers.ValidationError({"email": "Already in use"})
+            attrs["email"] = new_email.lower()
 
-            # Require privacy policy acceptance
-            if not attrs.get('accepted_privacy_policy', False):
-                raise serializers.ValidationError(
-                    {"accepted_privacy_policy": _("You must accept the Privacy Policy.")}
-                )
+        return super().validate(attrs)
 
-        return attrs
-
-    def create(self, validated_data):
-        """Create and return a new user with required fields."""
-        # Set acceptance timestamp
-        if validated_data.get('accepted_terms') or validated_data.get('accepted_privacy_policy'):
-            validated_data['terms_acceptance_date'] = timezone.now()
-
-        # Create user
-        user = User.objects.create_user(
-            email=validated_data.pop('email'),
-            password=validated_data.pop('password'),
-            **validated_data
-        )
-
-        # Create consent records
-        request = self.context.get('request')
-        if request and hasattr(request, 'META'):
-            ip_address = self._get_client_ip(request)
-            self._create_consent_records(user, ip_address)
-
+    def update(self, instance, data):
+        with transaction.atomic():
+            user = super().update(instance, data)
         return user
-
-    def update(self, instance, validated_data):
-        """Update user with special handling for password changes."""
-        # Handle password updates
-        password = validated_data.pop('password', None)
-        if password:
-            instance.set_password(password)
-
-        # Track GDPR consent changes
-        self._handle_consent_updates(instance, validated_data)
-
-        # Update other fields
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-
-        instance.save()
-        return instance
-
-    def _get_client_ip(self, request):
-        """Extract client IP address from request."""
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            return x_forwarded_for.split(',')[0]
-        return request.META.get('REMOTE_ADDR')
-
-    def _create_consent_records(self, user, ip_address):
-        """Create consent records for a new user."""
-        consents = []
-        if user.accepted_terms:
-            consents.append(('terms', True))
-        if user.accepted_privacy_policy:
-            consents.append(('privacy', True))
-        if user.marketing_emails:
-            consents.append(('marketing', True))
-
-        for consent_type, given in consents:
-            UserConsent.objects.create(  # pylint: disable=no-member
-                user=user,
-                consent_type=consent_type,
-                given=given,
-                ip_address=ip_address
-            )
-
-    def _handle_consent_updates(self, instance, validated_data):
-        """Handle updates to user consent fields."""
-        request = self.context.get('request')
-        ip_address = None
-        if request and hasattr(request, 'META'):
-            ip_address = self._get_client_ip(request)
-
-        # Check for terms acceptance
-        terms_changed = (
-            'accepted_terms' in validated_data and 
-            validated_data['accepted_terms'] != instance.accepted_terms
-        )
-        if terms_changed:
-            validated_data['terms_acceptance_date'] = timezone.now()
-            UserConsent.objects.create(  # pylint: disable=no-member
-                user=instance,
-                consent_type='terms',
-                given=validated_data['accepted_terms'],
-                ip_address=ip_address
-            )
-
-        # Check for privacy policy acceptance
-        privacy_changed = (
-            'accepted_privacy_policy' in validated_data and 
-            validated_data['accepted_privacy_policy'] != instance.accepted_privacy_policy
-        )
-        if privacy_changed:
-            if not instance.terms_acceptance_date and validated_data['accepted_privacy_policy']:
-                validated_data['terms_acceptance_date'] = timezone.now()
-            UserConsent.objects.create(  # pylint: disable=no-member
-                user=instance,
-                consent_type='privacy',
-                given=validated_data['accepted_privacy_policy'],
-                ip_address=ip_address
-            )
-
-        # Check for marketing preferences
-        marketing_changed = (
-            'marketing_emails' in validated_data and 
-            validated_data['marketing_emails'] != instance.marketing_emails
-        )
-        if marketing_changed:
-            UserConsent.objects.create(  # pylint: disable=no-member
-                user=instance,
-                consent_type='marketing',
-                given=validated_data['marketing_emails'],
-                ip_address=ip_address
-            )
-
-
-class LoginSerializer(serializers.Serializer):
-    """Serializer for user login."""
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
-
-    def create(self, validated_data):
-        """Create method not used for login."""
-        raise NotImplementedError("LoginSerializer does not support create operations")
-
-    def update(self, instance, validated_data):
-        """Update method not used for login."""
-        raise NotImplementedError("LoginSerializer does not support update operations")

@@ -12,6 +12,7 @@ from apps.users.models import User, VerificationToken, UserConsent
 
 class UserFactory(factory.django.DjangoModelFactory):
     """Factory for User — zero side-effects, no circular imports."""
+
     class Meta:
         model = User
         # no django_get_or_create so FactoryBoy will always INSERT,
@@ -42,6 +43,7 @@ class UserFactory(factory.django.DjangoModelFactory):
 
 class TokenFactory(factory.django.DjangoModelFactory):
     """Factory for VerificationToken."""
+
     class Meta:
         model = VerificationToken
 
@@ -56,6 +58,7 @@ class TokenFactory(factory.django.DjangoModelFactory):
 
 class ConsentFactory(factory.django.DjangoModelFactory):
     """Factory for UserConsent."""
+
     class Meta:
         model = UserConsent
 

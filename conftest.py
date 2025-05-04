@@ -1,20 +1,21 @@
 """Django admin configuration for the users app."""
+
 import pytest
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
 
+from tests.factories import UserFactory, TokenFactory, ConsentFactory
 
 # Factory-Boy registrations (auto-creates user_factory, token_factory …)
 
-from tests.factories import UserFactory, TokenFactory, ConsentFactory
 
 register(UserFactory)
 register(TokenFactory)
 register(ConsentFactory)
 
 
-
 # Generic DRF clients
+
 
 @pytest.fixture
 def api_client():
