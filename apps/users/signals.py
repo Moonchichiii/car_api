@@ -1,9 +1,4 @@
-"""Signal handlers for user authentication and consent events.
-
-This module contains signal receivers that handle various user-related events
-such as login, logout, signup, email confirmation, and consent management.
-"""
-
+"""Signals for user authentication events."""
 from allauth.account.signals import (email_confirmed, user_logged_in,
                                      user_logged_out, user_signed_up)
 from django.contrib.auth import get_user_model
@@ -17,15 +12,7 @@ User = get_user_model()
 
 
 @receiver(user_logged_in)
-def on_login(_sender, request, user, **_kwargs):
-    """Handle user login signal.
-    
-    Args:
-        _sender: The sender of the signal (unused)
-        request: The HTTP request object
-        user: The user object
-        **_kwargs: Additional keyword arguments (unused)
-    """
+def on_login(sender, request, user, **kwargs):
     if request:
         user.last_login_ip = get_client_ip(request)
         user.save(update_fields=["last_login_ip"])
@@ -33,28 +20,12 @@ def on_login(_sender, request, user, **_kwargs):
 
 
 @receiver(user_logged_out)
-def on_logout(_sender, request, user, **_kwargs):
-    """Handle user logout signal.
-    
-    Args:
-        _sender: The sender of the signal (unused)
-        request: The HTTP request object
-        user: The user object
-        **_kwargs: Additional keyword arguments (unused)
-    """
+def on_logout(sender, request, user, **kwargs):
     log_auth_event("logout", user, request)
 
 
 @receiver(user_signed_up)
-def on_signup(_sender, request, user, **_kwargs):
-    """Handle user signup signal.
-    
-    Args:
-        _sender: The sender of the signal (unused)
-        request: The HTTP request object
-        user: The user object
-        **_kwargs: Additional keyword arguments (unused)
-    """
+def on_signup(sender, request, user, **kwargs):
     method = "api" if request.path.startswith("/api/auth/registration") else "form"
     log_auth_event("signup", user, request, {"via": method})
     if request:
@@ -63,29 +34,13 @@ def on_signup(_sender, request, user, **_kwargs):
 
 
 @receiver(email_confirmed)
-def on_email_confirmed(_sender, request, email_address, **_kwargs):
-    """Handle email confirmation signal.
-    
-    Args:
-        _sender: The sender of the signal (unused)
-        request: The HTTP request object
-        email_address: The email address that was confirmed
-        **_kwargs: Additional keyword arguments (unused)
-    """
+def on_email_confirmed(sender, request, email_address, **kwargs):
     user = email_address.user
     log_auth_event("email_confirmed", user, request)
 
 
 @receiver(post_save, sender=UserConsent)
-def on_consent(_sender, instance, created, **_kwargs):
-    """Handle UserConsent save signal.
-    
-    Args:
-        _sender: The sender of the signal (unused)
-        instance: The UserConsent instance
-        created: Boolean indicating if this was a new instance
-        **_kwargs: Additional keyword arguments (unused)
-    """
+def on_consent(sender, instance, created, **kwargs):
     action = "consent_created" if created else "consent_updated"
     log_auth_event(
         action,

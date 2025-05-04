@@ -1,4 +1,5 @@
 """Serializers for user registration, login, and profile management."""
+
 import logging
 from typing import Any, Dict, Optional
 
@@ -155,6 +156,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta class for UserSerializer."""
+
         model = User
         fields = [
             "id",

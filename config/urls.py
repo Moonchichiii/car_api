@@ -1,7 +1,4 @@
-"""
-URL configuration for the car_api project.
-"""
-
+"""URL configuration for the car_api project."""
 from django.contrib import admin
 from django.urls import include, path, re_path
 

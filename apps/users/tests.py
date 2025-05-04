@@ -1,4 +1,3 @@
-# pylint: disable=missing-module-docstring,missing-function-docstring,missing-class-docstring,unused-import,unused-argument,redefined-outer-name,line-too-long,multiple-statements,C0301,C0115,C0116,W0621,W0613,W0201,E1101,W0719,R0903,C0114
 import json
 from datetime import date, timedelta
 
