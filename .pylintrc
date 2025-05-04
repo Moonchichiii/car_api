@@ -1,7 +1,40 @@
-[MESSAGES CONTROL]
+[MAIN]
 disable=
-    E0001,
-    bad-indentation
+    C0114,  # missing-module-docstring (we use module comments)
+    C0115,  # missing-class-docstring (not always needed)
+    C0116,  # missing-function-docstring (not always needed)
+    C0301,  # line-too-long (handled by black)
+    C0303,  # trailing-whitespace (handled by editor)
+    C0411,  # wrong-import-order (handled by black/isort)
+    C0412,  # ungrouped-imports (handled by black/isort)
+    R0903,  # too-few-public-methods (Django model pattern)
+    R0913,  # too-many-arguments (Django views pattern)
+    R0914,  # too-many-locals (Django views pattern)
+    R0801,  # duplicate-code (common in tests)
+    W0212,  # protected-access (needed for Django)
+    W0511,  # fixme/todo (useful during development)
+    W0718,  # broad-exception-caught (intentional design)
+    E1101,  # no-member (Django models have 'objects')
 
 [FORMAT]
-indent-string='    '
+max-line-length=88
+good-names=i,j,k,ex,Run,_,id,to,f,e
+
+[DESIGN]
+max-attributes=15
+
+[TYPECHECK]
+ignored-modules=django
+
+[VARIABLES]
+dummy-variables-rgx=_.*
+
+[BASIC]
+argument-naming-style=snake_case
+class-attribute-naming-style=any  # allow UPPERCASE constants
+class-naming-style=PascalCase
+constant-naming-style=UPPER_CASE
+function-naming-style=snake_case
+variable-naming-style=snake_case
+method-naming-style=snake_case
+module-naming-style=snake_case

@@ -2,10 +2,10 @@
 Provides logging functionality for user authentication events.
 """
 
-import logging
 import json
-from django.utils import timezone
+import logging
 
+from django.utils import timezone
 
 logger = logging.getLogger("car_api.auth")
 

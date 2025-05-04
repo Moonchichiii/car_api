@@ -3,8 +3,8 @@ Custom adapters for django-allauth.
 """
 
 from allauth.account.adapter import DefaultAccountAdapter
-from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 
 class CustomAccountAdapter(DefaultAccountAdapter):

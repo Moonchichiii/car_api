@@ -2,20 +2,19 @@
 import logging
 from typing import Any, Dict, Optional
 
-from django.contrib.auth import authenticate
-from django.db import transaction
-from django.utils import timezone
-from rest_framework import serializers
-
 from allauth.account.models import EmailAddress
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import LoginSerializer as DefaultLoginSerializer
+from django.contrib.auth import authenticate
+from django.db import transaction
+from django.utils import timezone
 from phonenumber_field.serializerfields import PhoneNumberField
+from rest_framework import serializers
 
-from .mixins import LicenseRequiredMixin, ConsentRequiredMixin
-from .utils import create_user_consents
 from .auth_logger import log_auth_event
+from .mixins import ConsentRequiredMixin, LicenseRequiredMixin
 from .models import User
+from .utils import create_user_consents
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +55,8 @@ class CustomRegisterSerializer(
         data = super().validate(data)
         pw = data.get("password")
         if pw:
-            from django.contrib.auth.password_validation import validate_password
+            from django.contrib.auth.password_validation import \
+                validate_password
 
             validate_password(pw)
         return data

@@ -7,7 +7,7 @@ import factory
 from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.users.models import User, VerificationToken, UserConsent
+from apps.users.models import User, UserConsent, VerificationToken
 
 
 class UserFactory(factory.django.DjangoModelFactory):

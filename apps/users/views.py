@@ -1,11 +1,10 @@
 """User profile and authentication API views."""
 
 from django.contrib.auth import get_user_model, logout
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.utils.translation import gettext_lazy as _
 from django.db import DatabaseError
-
+from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -14,9 +13,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
-from .serializers import UserSerializer
 from .auth_logger import log_auth_event
 from .models import BlacklistedToken
+from .serializers import UserSerializer
 
 User = get_user_model()
 

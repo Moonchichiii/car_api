@@ -1,6 +1,7 @@
 """Django admin configuration for the users app."""
 
 from typing import Any, Dict, Optional
+
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
@@ -9,9 +10,10 @@ from .auth_logger import log_auth_event
 
 
 class LicenseRequiredMixin:
-    """Ensure driver’s license number and expiry are provided."""
+    """Ensure drivers license number and expiry are provided."""
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Ensure drivers license number and expiry are provided."""
         data = super().validate(data)
         request: Optional[HttpRequest] = self.context.get("request")
 
@@ -41,6 +43,7 @@ class ConsentRequiredMixin:
     """Ensure acceptance of Terms of Service and Privacy Policy."""
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Ensure acceptance of Terms of Service and Privacy Policy."""
         data = super().validate(data)
         request: Optional[HttpRequest] = self.context.get("request")
 

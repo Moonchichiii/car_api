@@ -1,6 +1,6 @@
 """Middleware to enforce additional security policies:"""
 
-from .auth_logger import log_auth_event, get_client_ip
+from .auth_logger import get_client_ip, log_auth_event
 
 
 class AuthSecurityMiddleware:

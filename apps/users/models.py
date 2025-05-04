@@ -1,10 +1,7 @@
 """Models for users apps."""
 
-from django.contrib.auth.models import (
-    AbstractBaseUser,
-    BaseUserManager,
-    PermissionsMixin,
-)
+from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
+                                        PermissionsMixin)
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 from django.utils import timezone

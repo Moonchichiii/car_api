@@ -2,10 +2,12 @@
 
 import logging
 from typing import Dict, List, Optional
-from django.core.validators import validate_ipv46_address
+
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.utils import timezone
+from django.core.validators import validate_ipv46_address
 from django.db import DatabaseError
+from django.utils import timezone
+
 from .models import UserConsent
 
 logger = logging.getLogger(__name__)

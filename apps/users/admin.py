@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from .models import User, VerificationToken, UserConsent
+from .models import User, UserConsent, VerificationToken
 
 
 @admin.register(User)

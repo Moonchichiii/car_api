@@ -3,33 +3,31 @@ import json
 from datetime import date, timedelta
 
 import pytest
+from allauth.account.models import EmailAddress
+from allauth.account.signals import (email_confirmed, user_logged_in,
+                                     user_signed_up)
 from dateutil.relativedelta import relativedelta
-from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from django.urls import reverse
-from django.test import RequestFactory
 from django.db import DatabaseError as DjangoDatabaseError
+from django.test import RequestFactory
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
-from allauth.account.models import EmailAddress
-from allauth.account.signals import user_signed_up, user_logged_in, email_confirmed
 
 from apps.users.adapters import CustomAccountAdapter
+from apps.users.auth_logger import get_client_ip, log_auth_event
 from apps.users.middleware import AuthSecurityMiddleware
-from apps.users.mixins import LicenseRequiredMixin, ConsentRequiredMixin
-from apps.users.auth_logger import log_auth_event, get_client_ip
+from apps.users.mixins import ConsentRequiredMixin, LicenseRequiredMixin
+from apps.users.models import (BlacklistedToken, User, UserConsent,
+                               VerificationToken)
+from apps.users.serializers import (CustomLoginSerializer,
+                                    CustomRegisterSerializer, UserSerializer)
 from apps.users.utils import create_user_consents
-from apps.users.models import User, VerificationToken, UserConsent, BlacklistedToken
-from apps.users.serializers import (
-    CustomRegisterSerializer,
-    CustomLoginSerializer,
-    UserSerializer,
-)
-
 
 User = get_user_model()
 

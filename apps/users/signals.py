@@ -4,15 +4,11 @@ This module contains signal receivers that handle various user-related events
 such as login, logout, signup, email confirmation, and consent management.
 """
 
+from allauth.account.signals import (email_confirmed, user_logged_in,
+                                     user_logged_out, user_signed_up)
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from allauth.account.signals import (
-    email_confirmed,
-    user_logged_in,
-    user_logged_out,
-    user_signed_up,
-)
 
 from .auth_logger import get_client_ip, log_auth_event
 from .models import UserConsent

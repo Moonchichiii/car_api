@@ -4,7 +4,7 @@ import pytest
 from pytest_factoryboy import register
 from rest_framework.test import APIClient
 
-from tests.factories import UserFactory, TokenFactory, ConsentFactory
+from tests.factories import ConsentFactory, TokenFactory, UserFactory
 
 # Factory-Boy registrations (auto-creates user_factory, token_factory …)
 
