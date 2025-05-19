@@ -60,6 +60,15 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "csp.middleware.CSPMiddleware",
+]
+
+
+AUTH_PASSWORD_VALIDATORS = [
+  {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+  {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 12}},
+  {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+  {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 
@@ -105,6 +114,10 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
+SESSION_COOKIE_SECURE   = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE      = True
+CSRF_COOKIE_HTTPONLY    = True
 
 # REST FRAMEWORK & JWT
 
@@ -117,7 +130,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=3),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
@@ -129,7 +142,7 @@ REST_AUTH = {
     "JWT_AUTH_COOKIE_HTTP_ONLY": True,
     "JWT_AUTH_COOKIE_SECURE": not DEBUG,
     "JWT_AUTH_COOKIE_SAMESITE": "Lax",
-    # Custom registration serializer
+    # Custom registration & login serializer
     "LOGIN_SERIALIZER": "apps.users.serializers.CustomLoginSerializer",
     "REGISTER_SERIALIZER": "apps.users.serializers.CustomRegisterSerializer",
 }
@@ -221,6 +234,12 @@ CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=Csv()) or
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
+
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC  = ("'self'", "localhost:5173")
+
+REFERRER_POLICY = "same-origin"
+X_CONTENT_SECURITY_POLICY = "default-src 'self';"
 
 # INTERNATIONALIZATION
 LANGUAGE_CODE = "en-us"
